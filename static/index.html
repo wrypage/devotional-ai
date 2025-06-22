@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selah Q&A</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+        label, textarea { display: block; width: 100%; }
+        textarea { height: 100px; margin-bottom: 12px; }
+        #answer { margin-top: 20px; white-space: pre-wrap; }
+        button { padding: 8px 16px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Selah Q&A</h1>
+    <label for="question">Ask a theological question:</label>
+    <textarea id="question" placeholder="How can I have assurance that I am saved?"></textarea>
+    <button id="askBtn">Get Answer</button>
+    <div id="answer"></div>
+
+    <script>
+        document.getElementById("askBtn").addEventListener("click", async () => {
+            // Grab the text inside the textarea
+            const question = document.getElementById("question").value.trim();
+            if (!question) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            // Show a loading message
+            document.getElementById("answer").textContent = "Loading…";
+
+            try {
+                const res = await fetch("/ask", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ question })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Render any HTML (including <a> tags) correctly
+                    document.getElementById("answer").innerHTML = data.answer;
+                } else {
+                    document.getElementById("answer").innerHTML =
+                        `Error: ${data.detail || res.statusText}`;
+                }
+            } catch (err) {
+                document.getElementById("answer").innerHTML = `Error: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
